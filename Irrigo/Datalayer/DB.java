@@ -21,9 +21,9 @@ public class Db {
     // Configure these for your environment
     private static final String HOST = "localhost";
     private static final int PORT = 3306;
-    private static final String DATABASE = "your_database";
-    private static final String USER = "your_user";
-    private static final String PASSWORD = "your_password";
+    private static final String DATABASE = "irrigo_2526";
+    private static final String USER = "root";
+    private static final String PASSWORD = "admin";
 
     // JDBC URL
     private static final String URL = String.format(
