@@ -1,173 +1,337 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<title>Irrigo – Pompstatus</title>
- 
-    <style>
- 
-        body {
-            background: #0f1115;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
- 
-        .topbar {
-            display: flex;
-            align-items: center;
-            padding: 20px 30px;
-            background: #15171c;
-            font-size: 22px;
-            letter-spacing: 1px;
-        }
- 
-        .logo {
-            font-weight: bold;
-            margin-right: 20px;
-        }
- 
-        .title {
-            opacity: 0.7;
-            font-size: 18px;
-        }
- 
-        .container {
-            display: flex;
-            gap: 30px;
-            padding: 30px;
-        }
- 
-        .card {
-            background: #1a1d22;
-            padding: 25px;
-            border-radius: 15px;
-            width: 330px;
-        }
- 
-        h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
- 
-        .status-green {
-            color: #3cff8f;
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
- 
-        .status-red {
-            color: #ff5555;
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
- 
-        button {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #3a3f47;
-            background: #1b1d21;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-        }
- 
-        button:hover {
-            background: #22252b;
-        }
- 
-        .graph {
-            width: 100%;
-            margin: 15px 0;
-            border-radius: 10px;
-        }
- 
-        .pressure-status {
-            color: #3cff8f;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
- 
-        .dot {
-            width: 10px;
-            height: 10px;
-            background: #3cff8f;
-            border-radius: 50%;
-            display: inline-block;
-        }
- 
-    </style>
+  <meta charset="UTF-8">
+  <title>IRRIGO Dashboard - Pompstatus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <a href="./index.html" class="nav-item">Grondvochtigheid</a>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #05070a;
+      --bg-panel: #11161d;
+      --bg-sidebar: #0d1117;
+      --accent: #2ecc71;
+      --text-main: #ffffff;
+      --text-muted: #8b949e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 230px;
+      background: var(--bg-sidebar);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 16px;
+    }
+
+    .nav-item {
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+      text-decoration: none;
+      display: block;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      background: var(--bg-panel);
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+    }
+
+    .settings {
+      position: absolute;
+      right: 32px;
+      top: 24px;
+    }
+
+    .settings button {
+      border-radius: 999px;
+      border: 1px solid #2a323d;
+      padding: 8px 20px;
+      background: #050b11;
+      color: var(--text-main);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* CARDS ROW */
+    .cards-row {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #050b11;
+      border-radius: 18px;
+      padding: 24px 24px 20px;
+      flex: 1;
+      min-width: 260px;
+      border: 1px solid #141b24;
+    }
+
+    .card-title {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .pump-status-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .secondary-btn,
+    .primary-btn {
+      border-radius: 10px;
+      padding: 10px 22px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #2a323d;
+      background: #050b11;
+      color: var(--text-main);
+      transition: background .1s ease, transform .1s ease, box-shadow .1s ease;
+    }
+
+    .secondary-btn:hover,
+    .primary-btn:hover {
+      background: #0a1018;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+    }
+
+    .primary-btn {
+      background: var(--accent);
+      color: #02040a;
+      border-color: transparent;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: .03em;
+    }
+
+    .primary-btn:active,
+    .secondary-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* Waterdruk card */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-right: 6px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .status-row span {
+      color: var(--accent);
+    }
+
+    .chart-wrapper {
+      background: #050b11;
+      border-radius: 14px;
+      padding: 4px 10px 8px;
+      margin: 8px 0 18px;
+    }
+
+    svg {
+      width: 100%;
+      height: 150px;
+    }
+
+    @media (max-width: 800px) {
+      .cards-row {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
- 
-<div class="topbar">
-<div class="logo">IRRIGO</div>
-<div class="title">POMPSTATUS</div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">IRRIGO</div>
+    <nav class="nav">
+      <a href="index.html" class="nav-item">Grondvochtigheid</a>
+      <a href="pompstatus.html" class="nav-item active">Pompstatus</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="settings">
+      <button>Instellingen</button>
+    </div>
+
+    <div class="header">
+      <h1>Pompstatus</h1>
+    </div>
+
+    <div class="cards-row">
+      <!-- Pompstatus card -->
+      <section class="card">
+        <div class="card-title">Pompstatus</div>
+        <div id="pump-status-text" class="pump-status-value">Ingeschakeld</div>
+        <button id="pump-toggle-btn" class="secondary-btn">Schakel uit</button>
+      </section>
+
+      <!-- Waterdruk card -->
+      <section class="card">
+        <div class="card-title">Waterdruk</div>
+
+        <div class="status-row">
+          <div class="status-dot" id="pressure-dot"></div>
+          <span id="pressure-status">Normaal</span>
+        </div>
+
+        <div class="chart-wrapper">
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+            <path id="pressure-line"
+                  fill="none"
+                  stroke="#2ecc71"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <button class="primary-btn" id="start-pump-btn">Start pomp</button>
+      </section>
+    </div>
+  </main>
 </div>
- 
-<div class="container">
- 
-    <!-- LINKS: Pompstatus -->
-<div class="card">
-<h3>Pompstatus</h3>
-<p id="pumpState" class="status-green">Ingeschakeld</p>
- 
-        <button id="togglePump">Schakel uit</button>
-</div>
- 
-    <!-- RECHTS: Waterdruk -->
-<div class="card">
-<h3>Waterdruk</h3>
- 
-        <div class="pressure-status">
-<span class="dot"></span>
-            Normaal
-</div>
- 
-        <!-- Als je wilt kan ik deze grafiek vervangen door een echte dynamische grafiek -->
-<img src="https://i.imgur.com/9x0ZQXT.png" class="graph">
- 
-        <button id="startPump">Start pomp</button>
-</div>
- 
-</div>
- 
+
 <script>
- 
-async function updatePump(state){
-    // Java backend endpoints
-    await fetch("http://localhost:8080/pump/" + state, {method: "POST"});
-}
- 
-document.getElementById("togglePump").onclick = () => {
-    const current = document.getElementById("pumpState").innerText;
- 
-    if(current === "Ingeschakeld"){
-        document.getElementById("pumpState").innerText = "Uitgeschakeld";
-        document.getElementById("pumpState").className = "status-red";
-        document.getElementById("togglePump").innerText = "Schakel in";
-        updatePump("off");
+  // ---------- Pompstatus toggle ----------
+  const pumpStatusText = document.getElementById("pump-status-text");
+  const pumpToggleBtn = document.getElementById("pump-toggle-btn");
+  let pumpAan = true;
+
+  pumpToggleBtn.addEventListener("click", () => {
+    pumpAan = !pumpAan;
+    if (pumpAan) {
+      pumpStatusText.textContent = "Ingeschakeld";
+      pumpStatusText.style.color = "#2ecc71";
+      pumpToggleBtn.textContent = "Schakel uit";
     } else {
-        document.getElementById("pumpState").innerText = "Ingeschakeld";
-        document.getElementById("pumpState").className = "status-green";
-        document.getElementById("togglePump").innerText = "Schakel uit";
-        updatePump("on");
+      pumpStatusText.textContent = "Uitgeschakeld";
+      pumpStatusText.style.color = "#e74c3c";
+      pumpToggleBtn.textContent = "Schakel in";
     }
-};
- 
-document.getElementById("startPump").onclick = () => {
-    document.getElementById("pumpState").innerText = "Ingeschakeld";
-    document.getElementById("pumpState").className = "status-green";
-    document.getElementById("togglePump").innerText = "Schakel uit";
-    updatePump("on");
-};
- 
+  });
+
+  // ---------- Waterdruk grafiek (historisch) ----------
+  const pressureHistory = [2.1, 2.0, 2.2, 2.1, 2.3, 2.2, 2.1, 2.2]; // bar
+
+  function buildPressurePath(values, width, height, minVal, maxVal) {
+    const minX = 0;
+    const maxX = width;
+    const stepX = (maxX - minX) / (values.length - 1);
+
+    return values.map((v, i) => {
+      const x = minX + i * stepX;
+      const norm = (v - minVal) / (maxVal - minVal); // 0..1
+      const y = height - (norm * (height - 6));      // 6px padding boven
+      return (i === 0 ? "M" : "L") + x + " " + y.toFixed(2);
+    }).join(" ");
+  }
+
+  const pressureLine = document.getElementById("pressure-line");
+  if (pressureLine) {
+    const d = buildPressurePath(pressureHistory, 100, 40, 1.5, 3.0);
+    pressureLine.setAttribute("d", d);
+  }
+
+  // ---------- Start pomp knop ----------
+  const startPumpBtn = document.getElementById("start-pump-btn");
+  const pressureStatus = document.getElementById("pressure-status");
+  const pressureDot = document.getElementById("pressure-dot");
+
+  startPumpBtn.addEventListener("click", () => {
+    // simpele demo: laat status kort "Actief" zien
+    pressureStatus.textContent = "Actief";
+    pressureDot.style.backgroundColor = "#2ecc71";
+
+    setTimeout(() => {
+      pressureStatus.textContent = "Normaal";
+      pressureDot.style.backgroundColor = "#2ecc71";
+    }, 1500);
+  });
 </script>
- 
 </body>
 </html>
