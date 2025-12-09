@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>IRRIGO Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Optional font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #05070a;
+      --bg-panel: #11161d;
+      --bg-sidebar: #0d1117;
+      --accent: #2ecc71;
+      --text-main: #ffffff;
+      --text-muted: #8b949e;
+      --percent: 35; /* change this if you want another % */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 230px;
+      background: var(--bg-sidebar);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 16px;
+    }
+
+    .nav-item {
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    /* MAIN CONTENT */
+    .main {
+      flex: 1;
+      background: var(--bg-panel);
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .card {
+      margin-top: 16px;
+      background: #050b11;
+      border-radius: 18px;
+      padding: 32px 32px 28px;
+      display: flex;
+      gap: 48px;
+      align-items: center;
+    }
+
+    /* GAUGE */
+    .gauge-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+    }
+
+    .gauge {
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(farthest-side, #050b11 72%, transparent 72%),
+        conic-gradient(
+          var(--accent) calc(var(--percent) * 1%),
+          #1f2933 0
+        );
+    }
+
+    .gauge-inner {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #050b11;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px #10151d;
+    }
+
+    .gauge-inner span {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .gauge-labels {
+      width: 190px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* RIGHT SIDE (CHART + BUTTON) */
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .chart-wrapper {
+      background: #050b11;
+      border-radius: 14px;
+      padding: 8px 16px 12px;
+      border: 1px solid #141b24;
+    }
+
+    svg {
+      width: 100%;
+      height: 200px;
+    }
+
+    .button-wrapper {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .primary-btn {
+      border: none;
+      cursor: pointer;
+      padding: 14px 32px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #02040a;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 14px 30px rgba(46,204,113,0.25);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 35px rgba(46,204,113,0.38);
+      background: #35e57d;
+    }
+
+    .primary-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 16px rgba(46,204,113,0.35);
+    }
+
+    /* SETTINGS BUTTON (TOP RIGHT) */
+    .settings {
+      position: absolute;
+      right: 32px;
+      top: 24px;
+    }
+
+    .settings button {
+      border-radius: 999px;
+      border: 1px solid #2a323d;
+      padding: 8px 20px;
+      background: #050b11;
+      color: var(--text-main);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .card {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .button-wrapper {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">IRRIGO</div>
+    <nav class="nav">
+      <div class="nav-item active">Grondvochtigheid</div>
+      <div class="nav-item">Pompstatus</div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="settings">
+      <button>Instellingen</button>
+    </div>
+
+    <div class="header">
+      <h1>Grondvochtigheid</h1>
+      <p>Website-dashboard toont actuele vochtigheid van de grond</p>
+    </div>
+
+    <section class="card">
+      <!-- GAUGE -->
+      <div class="gauge-section">
+        <div class="gauge">
+          <div class="gauge-inner">
+            <span id="percent-text">35%</span>
+          </div>
+        </div>
+        <div class="gauge-labels">
+          <span>Droog</span>
+          <span>Nat</span>
+        </div>
+      </div>
+
+      <!-- CHART + BUTTON -->
+      <div class="right">
+        <div class="chart-wrapper">
+          <!-- simple SVG line chart just for visuals -->
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#1abc9c" stop-opacity="0.4" />
+                <stop offset="100%" stop-color="#2ecc71" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+            <path d="M0 30 L20 20 L40 26 L60 18 L80 24 L100 10"
+                  fill="none"
+                  stroke="url(#lineGradient)"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="button-wrapper">
+          <button class="primary-btn">Automatisch water geven</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // If you want to animate or change the percentage dynamically:
+  const gauge = document.documentElement; // root :root
+  const percentText = document.getElementById("percent-text");
+
+  // example: animate from 0 to 35 on load
+  let current = 0;
+  const target = 35;
+
+  const interval = setInterval(() => {
+    current++;
+    if (current > target) {
+      clearInterval(interval);
+      return;
+    }
+    gauge.style.setProperty("--percent", current);
+    percentText.textContent = current + "%";
+  }, 30);
+</script>
+</body>
+</html>

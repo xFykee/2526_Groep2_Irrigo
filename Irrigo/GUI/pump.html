@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Irrigo – Pompstatus</title>
+ 
+    <style>
+ 
+        body {
+            background: #0f1115;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+ 
+        .topbar {
+            display: flex;
+            align-items: center;
+            padding: 20px 30px;
+            background: #15171c;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+ 
+        .logo {
+            font-weight: bold;
+            margin-right: 20px;
+        }
+ 
+        .title {
+            opacity: 0.7;
+            font-size: 18px;
+        }
+ 
+        .container {
+            display: flex;
+            gap: 30px;
+            padding: 30px;
+        }
+ 
+        .card {
+            background: #1a1d22;
+            padding: 25px;
+            border-radius: 15px;
+            width: 330px;
+        }
+ 
+        h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+ 
+        .status-green {
+            color: #3cff8f;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+ 
+        .status-red {
+            color: #ff5555;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+ 
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #3a3f47;
+            background: #1b1d21;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+ 
+        button:hover {
+            background: #22252b;
+        }
+ 
+        .graph {
+            width: 100%;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+ 
+        .pressure-status {
+            color: #3cff8f;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+ 
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #3cff8f;
+            border-radius: 50%;
+            display: inline-block;
+        }
+ 
+    </style>
+</head>
+<body>
+ 
+<div class="topbar">
+<div class="logo">IRRIGO</div>
+<div class="title">POMPSTATUS</div>
+</div>
+ 
+<div class="container">
+ 
+    <!-- LINKS: Pompstatus -->
+<div class="card">
+<h3>Pompstatus</h3>
+<p id="pumpState" class="status-green">Ingeschakeld</p>
+ 
+        <button id="togglePump">Schakel uit</button>
+</div>
+ 
+    <!-- RECHTS: Waterdruk -->
+<div class="card">
+<h3>Waterdruk</h3>
+ 
+        <div class="pressure-status">
+<span class="dot"></span>
+            Normaal
+</div>
+ 
+        <!-- Als je wilt kan ik deze grafiek vervangen door een echte dynamische grafiek -->
+<img src="https://i.imgur.com/9x0ZQXT.png" class="graph">
+ 
+        <button id="startPump">Start pomp</button>
+</div>
+ 
+</div>
+ 
+<script>
+ 
+async function updatePump(state){
+    // Java backend endpoints
+    await fetch("http://localhost:8080/pump/" + state, {method: "POST"});
+}
+ 
+document.getElementById("togglePump").onclick = () => {
+    const current = document.getElementById("pumpState").innerText;
+ 
+    if(current === "Ingeschakeld"){
+        document.getElementById("pumpState").innerText = "Uitgeschakeld";
+        document.getElementById("pumpState").className = "status-red";
+        document.getElementById("togglePump").innerText = "Schakel in";
+        updatePump("off");
+    } else {
+        document.getElementById("pumpState").innerText = "Ingeschakeld";
+        document.getElementById("pumpState").className = "status-green";
+        document.getElementById("togglePump").innerText = "Schakel uit";
+        updatePump("on");
+    }
+};
+ 
+document.getElementById("startPump").onclick = () => {
+    document.getElementById("pumpState").innerText = "Ingeschakeld";
+    document.getElementById("pumpState").className = "status-green";
+    document.getElementById("togglePump").innerText = "Schakel uit";
+    updatePump("on");
+};
+ 
+</script>
+ 
+</body>
+</html>
