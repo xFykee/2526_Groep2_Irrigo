@@ -44,9 +44,83 @@ public class DB {
             stmt.executeUpdate(createDB);
             System.out.println("Database '" + DATABASE + "' is ready.");
             
-            
         } catch (SQLException ex) {
             System.err.println("Database initialization error: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        
+        // After database is created, create tables
+        createTables();
+    }
+
+    // Create all tables based on the schema
+    private static void createTables() {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+            
+            String createUsersTable =
+                "CREATE TABLE IF NOT EXISTS users (" +
+                "user_id INT PRIMARY KEY AUTO_INCREMENT," +
+                "username VARCHAR(50) NOT NULL UNIQUE," +
+                "password_hash VARCHAR(255) NOT NULL," +
+                "email VARCHAR(100) NOT NULL UNIQUE," +
+                "role ENUM('admin', 'user') DEFAULT 'user'," +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                ")";
+            stmt.executeUpdate(createUsersTable);
+            System.out.println("Table 'users' created successfully.");
+            
+            // Create devices table
+            String createDevicesTable =
+                "CREATE TABLE IF NOT EXISTS devices (" +
+                "device_id INT PRIMARY KEY AUTO_INCREMENT," +
+                "user_id INT NOT NULL," +
+                "name VARCHAR(100) NOT NULL," +
+                "location VARCHAR(255)," +
+                "api_key VARCHAR(255) NOT NULL UNIQUE," +
+                "threshold DECIMAL(5,2)," +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "last_seen TIMESTAMP NULL," +
+                "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE" +
+                ")";
+            stmt.executeUpdate(createDevicesTable);
+            System.out.println("Table 'devices' created successfully.");
+            
+            // Create sensor_data table
+            String createSensorDataTable =
+                "CREATE TABLE IF NOT EXISTS sensor_data (" +
+                "data_id INT PRIMARY KEY AUTO_INCREMENT," +
+                "device_id INT NOT NULL," +
+                "soil_moisture DECIMAL(5,2)," +
+                "pump_status BOOLEAN," +
+                "temperature DECIMAL(5,2)," +
+                "humidity DECIMAL(5,2)," +
+                "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE" +
+                ")";
+            stmt.executeUpdate(createSensorDataTable);
+            System.out.println("Table 'sensor_data' created successfully.");
+            
+            // Create control_logs table
+            String createControlLogsTable =
+                "CREATE TABLE IF NOT EXISTS control_logs (" +
+                "log_id INT PRIMARY KEY AUTO_INCREMENT," +
+                "device_id INT NOT NULL," +
+                "user_id INT," +
+                "action VARCHAR(50) NOT NULL," +
+                "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE," +
+                "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL" +
+                ")";
+            stmt.executeUpdate(createControlLogsTable);
+            System.out.println("Table 'control_logs' created successfully.");
+            
+            System.out.println("All tables created successfully!");
+            System.out.println("All tables created successfully!");
+            
+        } catch (SQLException ex) {
+            System.err.println("Table creation error: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
