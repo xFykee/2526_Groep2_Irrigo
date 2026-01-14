@@ -18,6 +18,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
+        int vochtigheid = Database.getLatestMoisture();
+
         // Sidebar ---------------------------
         VBox sidebar = new VBox(20);
         sidebar.setPadding(new Insets(40, 20, 20, 20));
@@ -49,13 +51,13 @@ public class Main extends Application {
         StackPane gaugePane = new StackPane();
         gaugePane.setPrefSize(200, 200);
 
-        Arc arc = new Arc(100, 100, 90, 90, 90, -126);  
+        Arc arc = new Arc(100, 100, 90, 90, 90, (vochtigheid * -3.6));  
         arc.setFill(Color.TRANSPARENT);
         arc.setStroke(Color.web("#2ecc71"));
         arc.setStrokeWidth(15);
         arc.setType(ArcType.OPEN);
 
-        Label percentage = new Label("35%");
+        Label percentage = new Label(vochtigheid + "%");
         percentage.setStyle("-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;");
 
         gaugePane.getChildren().addAll(arc, percentage);

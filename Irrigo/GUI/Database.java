@@ -1,11 +1,9 @@
 package Irrigo.GUI;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Database {
-    // Vervang deze gegevens zodra je database klaar is
+    // Deze gegevens gebruik je later voor je echte database
     private static final String URL = "jdbc:mysql://localhost:3306/irrigo_db";
     private static final String USER = "root";
     private static final String PASS = "";
@@ -14,12 +12,13 @@ public class Database {
         try {
             return DriverManager.getConnection(URL, USER, PASS);
         } catch (SQLException e) {
-            System.out.println("Database niet verbonden: " + e.getMessage());
+            // Geen paniek: als er geen database is, printen we alleen een waarschuwing
+            System.out.println("Database verbinding mislukt, we gebruiken fallback data.");
             return null;
         }
     }
 
-    // Haal de meest recente vochtigheid op (met fallback naar 35%)
+    // Haal de meest recente vochtigheid op
     public static int getLatestMoisture() {
         String query = "SELECT waarde FROM vochtigheid ORDER BY tijdstip DESC LIMIT 1";
         try (Connection conn = getConnection()) {
@@ -31,12 +30,12 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return 35; // De waarde die je al in Gui.java en index.html had
+        return 35; // De veilige reserve-waarde als de DB nog niet af is
     }
 
-    // Haal de pompstatus op
+    // Haal de pompstatus op voor pump.java
     public static boolean isPumpActive() {
-        String query = "SELECT status FROM pomp_instellingen LIMIT 1";
+        String query = "SELECT status FROM apparaten WHERE naam = 'pomp' LIMIT 1";
         try (Connection conn = getConnection()) {
             if (conn != null) {
                 Statement stmt = conn.createStatement();
@@ -46,6 +45,6 @@ public class Database {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return true; // Fallback naar 'Ingeschakeld' zoals in je originele code
+        return true; // Standaard op 'Ingeschakeld' zetten
     }
 }
