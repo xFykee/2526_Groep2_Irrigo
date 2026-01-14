@@ -313,13 +313,19 @@
 </div>
 
 <script>
-  // ---------- Gauge animatie ----------
+  // ---------- Variabelen & Elementen ----------
   const root = document.documentElement;
   const percentText = document.getElementById("percent-text");
+  const pathEl = document.getElementById("moisture-line");
+  const autoBtn = document.getElementById("auto-water-btn");
+  
+  let autoWaterAan = false;
+  // Standaard geschiedenis voor als de database nog leeg is
+  let moistureHistory = [28, 30, 32, 31, 33, 34, 35, 36, 37]; 
 
+  // ---------- Gauge animatie (Initialisatie) ----------
   let current = 0;
-  const target = 35; // zelfde als beginwaarde in :root
-
+  const target = 35; // Startwaarde
   const interval = setInterval(() => {
     current++;
     if (current > target) {
@@ -330,10 +336,7 @@
     percentText.textContent = current + "%";
   }, 30);
 
-  // ---------- Historische vochtigheid grafiek ----------
-  // Simpele demo data (bijv. metingen over de dag in %)
-  const moistureHistory = [28, 30, 32, 31, 33, 34, 35, 36, 37];
-
+  // ---------- Historische vochtigheid grafiek (Tekenen) ----------
   function buildPath(values, width, height, paddingTop) {
     const maxVal = 100; // schaal 0–100%
     const minX = 0;
@@ -348,23 +351,59 @@
     }).join(" ");
   }
 
-  const pathEl = document.getElementById("moisture-line");
+  // Teken de initiële grafiek
   if (pathEl) {
     const d = buildPath(moistureHistory, 100, 40, 5);
     pathEl.setAttribute("d", d);
   }
 
-  // ---------- Auto-water knop ----------
-  const autoBtn = document.getElementById("auto-water-btn");
-  let autoWaterAan = false;
+  // ---------- DATABASE UPDATES (Micro:bit koppeling) ----------
+  async function updateDashboard() {
+    try {
+      // 1. Haal de laatste Micro:bit waarde op
+      const response = await fetch('/api/moisture-latest'); 
+      const data = await response.json();
 
+      // De Micro:bit geeft 0-1023. Omrekenen naar %
+      let vochtPercentage = Math.round((data.moisture / 1023) * 100);
+
+      // Update de UI elementen
+      root.style.setProperty("--percent", vochtPercentage);
+      percentText.textContent = vochtPercentage + "%";
+
+      // 2. Haal geschiedenis op voor de grafiek
+      const historyResponse = await fetch('/api/moisture-history');
+      const historyData = await historyResponse.json();
+      
+      if (pathEl && historyData.length > 0) {
+        const d = buildPath(historyData, 100, 40, 5);
+        pathEl.setAttribute("d", d);
+      }
+    } catch (error) {
+      // Als de database/API nog niet online is, blijft de huidige UI gewoon staan
+      console.log("Wachten op database verbinding...");
+    }
+  }
+
+  // ---------- Auto-water knop ----------
   autoBtn.addEventListener("click", () => {
+    // TIP: Hier kun je later een check toevoegen of de motor aan staat
     autoWaterAan = !autoWaterAan;
     autoBtn.classList.toggle("active", autoWaterAan);
+    
     autoBtn.textContent = autoWaterAan
       ? "Automatisch water: AAN"
       : "Automatisch water geven";
+      
+    // Verstuur de nieuwe status naar de database zodat de Micro:bit dit weet
+    fetch('/api/set-auto-water', {
+        method: 'POST',
+        body: JSON.stringify({ active: autoWaterAan })
+    });
   });
+
+  // Start de automatische verversing (elke 2 seconden)
+  setInterval(updateDashboard, 2000);
 </script>
 </body>
 </html>
