@@ -121,3 +121,4 @@ public class Main extends Application {
     }
 }
 
+/* vochtigheid, pomp aan/uit, flow switch */
