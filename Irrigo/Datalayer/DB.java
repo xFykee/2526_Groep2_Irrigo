@@ -1,23 +1,18 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DB {
-    // Configure these for your environment
+    // Database configuratie
     private static final String HOST = "localhost";
     private static final int PORT = 3306;
     private static final String DATABASE = "irrigo_2526";
     private static final String USER = "root";
-    private static final String PASSWORD = "admin";
+    private static final String PASSWORD = "admin";  // Pas aan naar jouw wachtwoord
 
-    // JDBC URL without database (for initial connection)
     private static final String BASE_URL = String.format(
         "jdbc:mysql://%s:%d/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
         HOST, PORT
     );
     
-    // JDBC URL with database
     private static final String URL = String.format(
         "jdbc:mysql://%s:%d/%s?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
         HOST, PORT, DATABASE
@@ -25,39 +20,33 @@ public class DB {
 
     static {
         try {
-            // Ensure driver is loaded
             Class.forName("com.mysql.cj.jdbc.Driver");
-            // Try to create database if it doesn't exist
             initializeDatabase();
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC driver not found on classpath.", e);
+            throw new RuntimeException("MySQL JDBC driver niet gevonden!", e);
         }
     }
 
-    // Create database if it doesn't exist
     private static void initializeDatabase() {
         try (Connection conn = DriverManager.getConnection(BASE_URL, USER, PASSWORD);
              Statement stmt = conn.createStatement()) {
             
-            // Create database if not exists
-            String createDB = "CREATE DATABASE IF NOT EXISTS " + DATABASE;
-            stmt.executeUpdate(createDB);
-            System.out.println("Database '" + DATABASE + "' is ready.");
+            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DATABASE);
+            System.out.println("✓ Database '" + DATABASE + "' aangemaakt");
             
         } catch (SQLException ex) {
-            System.err.println("Database initialization error: " + ex.getMessage());
+            System.err.println("Database fout: " + ex.getMessage());
             ex.printStackTrace();
         }
         
-        // After database is created, create tables
         createTables();
     }
 
-    // Create all tables based on the schema
     private static void createTables() {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
             
+            // Tabel voor gebruikers
             String createUsersTable =
                 "CREATE TABLE IF NOT EXISTS users (" +
                 "user_id INT PRIMARY KEY AUTO_INCREMENT," +
@@ -68,9 +57,9 @@ public class DB {
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ")";
             stmt.executeUpdate(createUsersTable);
-            System.out.println("Table 'users' created successfully.");
+            System.out.println("✓ Tabel 'users' aangemaakt");
             
-            // Create devices table
+            // Tabel voor apparaten/devices
             String createDevicesTable =
                 "CREATE TABLE IF NOT EXISTS devices (" +
                 "device_id INT PRIMARY KEY AUTO_INCREMENT," +
@@ -78,30 +67,34 @@ public class DB {
                 "name VARCHAR(100) NOT NULL," +
                 "location VARCHAR(255)," +
                 "api_key VARCHAR(255) NOT NULL UNIQUE," +
-                "threshold DECIMAL(5,2)," +
+                "threshold DECIMAL(5,2) DEFAULT 30.0," +
+                "auto_mode BOOLEAN DEFAULT TRUE," +
+                "motor_power BOOLEAN DEFAULT FALSE," +
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                 "last_seen TIMESTAMP NULL," +
                 "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE" +
                 ")";
             stmt.executeUpdate(createDevicesTable);
-            System.out.println("Table 'devices' created successfully.");
+            System.out.println("✓ Tabel 'devices' aangemaakt");
             
-            // Create sensor_data table
-            String createSensorDataTable =
-                "CREATE TABLE IF NOT EXISTS sensor_data (" +
-                "data_id INT PRIMARY KEY AUTO_INCREMENT," +
+            // Tabel voor metingen (sensor data van Micro:bit)
+            String createMetingenTable =
+                "CREATE TABLE IF NOT EXISTS metingen (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
                 "device_id INT NOT NULL," +
-                "soil_moisture DECIMAL(5,2)," +
-                "pump_status BOOLEAN," +
+                "vochtigheid INT NOT NULL," +
+                "waterniveau INT NOT NULL," +
+                "pomp_status BOOLEAN NOT NULL," +
                 "temperature DECIMAL(5,2)," +
-                "humidity DECIMAL(5,2)," +
-                "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
-                "FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE" +
+                "tijdstip TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                "FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE," +
+                "INDEX idx_tijdstip (tijdstip)," +
+                "INDEX idx_device_tijdstip (device_id, tijdstip)" +
                 ")";
-            stmt.executeUpdate(createSensorDataTable);
-            System.out.println("Table 'sensor_data' created successfully.");
+            stmt.executeUpdate(createMetingenTable);
+            System.out.println("✓ Tabel 'metingen' aangemaakt");
             
-            // Create control_logs table
+            // Tabel voor controle logs
             String createControlLogsTable =
                 "CREATE TABLE IF NOT EXISTS control_logs (" +
                 "log_id INT PRIMARY KEY AUTO_INCREMENT," +
@@ -113,32 +106,59 @@ public class DB {
                 "FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL" +
                 ")";
             stmt.executeUpdate(createControlLogsTable);
-            System.out.println("Table 'control_logs' created successfully.");
+            System.out.println("✓ Tabel 'control_logs' aangemaakt");
             
-            System.out.println("All tables created successfully!");
-            System.out.println("All tables created successfully!");
+            // Voeg een standaard gebruiker en device toe
+            insertDefaultData(conn);
+            
+            System.out.println("\n🎉 Database volledig geconfigureerd!");
             
         } catch (SQLException ex) {
-            System.err.println("Table creation error: " + ex.getMessage());
+            System.err.println("Tabel aanmaak fout: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
+    
+    private static void insertDefaultData(Connection conn) throws SQLException {
+        // Check of er al een gebruiker bestaat
+        String checkUser = "SELECT COUNT(*) FROM users";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(checkUser)) {
+            if (rs.next() && rs.getInt(1) == 0) {
+                // Voeg standaard admin gebruiker toe
+                String insertUser = "INSERT INTO users (username, password_hash, email, role) " +
+                                   "VALUES ('admin', 'admin123', 'admin@irrigo.nl', 'admin')";
+                stmt.executeUpdate(insertUser);
+                System.out.println("✓ Standaard admin gebruiker aangemaakt (admin/admin123)");
+                
+                // Voeg standaard device toe
+                String insertDevice = "INSERT INTO devices (user_id, name, location, api_key, threshold) " +
+                                     "VALUES (1, 'Micro:bit Tuin', 'Achtertuin', 'DEFAULT_API_KEY_123', 30.0)";
+                stmt.executeUpdate(insertDevice);
+                System.out.println("✓ Standaard device aangemaakt");
+            }
+        }
+    }
 
-    // Get a new connection (caller should close)
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-    // Quick test runner
     public static void main(String[] args) {
+        System.out.println("Database setup gestart...\n");
         try (Connection conn = getConnection()) {
             if (conn != null && !conn.isClosed()) {
-                System.out.println("Connected to MySQL successfully.");
-            } else {
-                System.err.println("Failed to establish connection.");
+                System.out.println("\n✓ Database verbinding succesvol!");
+                
+                // Test query
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as total FROM metingen");
+                if (rs.next()) {
+                    System.out.println("Aantal metingen in database: " + rs.getInt("total"));
+                }
             }
         } catch (SQLException ex) {
-            System.err.println("Connection error: " + ex.getMessage());
+            System.err.println("Verbindingsfout: " + ex.getMessage());
             ex.printStackTrace();
         }
     }
