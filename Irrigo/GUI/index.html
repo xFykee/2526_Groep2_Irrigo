@@ -2,10 +2,8 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>IRRIGO Dashboard</title>
+  <title>IRRIGO Dashboard - Grondvochtigheid</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Optional font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -16,7 +14,7 @@
       --accent: #2ecc71;
       --text-main: #ffffff;
       --text-muted: #8b949e;
-      --percent: 35; /* change this if you want another % */
+      --percent: 35; /* startwaarde */
     }
 
     * {
@@ -34,6 +32,7 @@
     .app {
       display: flex;
       min-height: 100vh;
+      position: relative;
     }
 
     /* SIDEBAR */
@@ -63,6 +62,8 @@
       color: var(--text-muted);
       cursor: pointer;
       position: relative;
+      text-decoration: none;
+      display: block;
     }
 
     .nav-item.active {
@@ -90,6 +91,8 @@
       display: flex;
       flex-direction: column;
       gap: 24px;
+      position: relative;
+      overflow: hidden;
     }
 
     .header h1 {
@@ -200,6 +203,10 @@
       transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
     }
 
+    .primary-btn.active {
+      background: #1f9b55;
+    }
+
     .primary-btn:hover {
       transform: translateY(-1px);
       box-shadow: 0 18px 35px rgba(46,204,113,0.38);
@@ -245,8 +252,8 @@
   <aside class="sidebar">
     <div class="logo">IRRIGO</div>
     <nav class="nav">
-      <div class="nav-item active">Grondvochtigheid</div>
-      <div class="nav-item">Pompstatus</div>
+      <a href="index.html" class="nav-item active">Grondvochtigheid</a>
+      <a href="pompstatus.html" class="nav-item">Pompstatus</a>
     </nav>
   </aside>
 
@@ -278,7 +285,7 @@
       <!-- CHART + BUTTON -->
       <div class="right">
         <div class="chart-wrapper">
-          <!-- simple SVG line chart just for visuals -->
+          <!-- SVG, lijn wordt in JS gezet -->
           <svg viewBox="0 0 100 40" preserveAspectRatio="none">
             <defs>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
@@ -286,7 +293,7 @@
                 <stop offset="100%" stop-color="#2ecc71" stop-opacity="0.9" />
               </linearGradient>
             </defs>
-            <path d="M0 30 L20 20 L40 26 L60 18 L80 24 L100 10"
+            <path id="moisture-line"
                   fill="none"
                   stroke="url(#lineGradient)"
                   stroke-width="1.8"
@@ -296,7 +303,9 @@
         </div>
 
         <div class="button-wrapper">
-          <button class="primary-btn">Automatisch water geven</button>
+          <button class="primary-btn" id="auto-water-btn">
+            Automatisch water geven
+          </button>
         </div>
       </div>
     </section>
@@ -304,13 +313,12 @@
 </div>
 
 <script>
-  // If you want to animate or change the percentage dynamically:
-  const gauge = document.documentElement; // root :root
+  // ---------- Gauge animatie ----------
+  const root = document.documentElement;
   const percentText = document.getElementById("percent-text");
 
-  // example: animate from 0 to 35 on load
   let current = 0;
-  const target = 35;
+  const target = 35; // zelfde als beginwaarde in :root
 
   const interval = setInterval(() => {
     current++;
@@ -318,9 +326,46 @@
       clearInterval(interval);
       return;
     }
-    gauge.style.setProperty("--percent", current);
+    root.style.setProperty("--percent", current);
     percentText.textContent = current + "%";
   }, 30);
+
+  // ---------- Historische vochtigheid grafiek ----------
+  // Simpele demo data (bijv. metingen over de dag in %)
+  const moistureHistory = [28, 30, 32, 31, 33, 34, 35, 36, 37];
+
+  function buildPath(values, width, height, paddingTop) {
+    const maxVal = 100; // schaal 0–100%
+    const minX = 0;
+    const maxX = width;
+    const stepX = (maxX - minX) / (values.length - 1);
+
+    return values.map((v, i) => {
+      const x = minX + i * stepX;
+      const norm = v / maxVal;            // 0..1
+      const y = height - (norm * (height - paddingTop)); // omdraaien
+      return (i === 0 ? "M" : "L") + x + " " + y.toFixed(2);
+    }).join(" ");
+  }
+
+  const pathEl = document.getElementById("moisture-line");
+  if (pathEl) {
+    const d = buildPath(moistureHistory, 100, 40, 5);
+    pathEl.setAttribute("d", d);
+  }
+
+  // ---------- Auto-water knop ----------
+  const autoBtn = document.getElementById("auto-water-btn");
+  let autoWaterAan = false;
+
+  autoBtn.addEventListener("click", () => {
+    autoWaterAan = !autoWaterAan;
+    autoBtn.classList.toggle("active", autoWaterAan);
+    autoBtn.textContent = autoWaterAan
+      ? "Automatisch water: AAN"
+      : "Automatisch water geven";
+  });
 </script>
 </body>
 </html>
+
