@@ -11,8 +11,8 @@ BAUD_RATE = 9600
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',
-    'database': 'irrigo_db'
+    'password': 'admin',
+    'database': 'irrigo_2526'
 }
 
 def start_bridge():
@@ -41,8 +41,8 @@ def start_bridge():
                         float_val = int(parts[1].split(':')[1].strip())
                         pump = int(parts[2].split(':')[1].strip())
 
-                        # Voer de INSERT uit
-                        sql = "INSERT INTO metingen (vochtigheid, waterniveau, pomp_status) VALUES (%s, %s, %s)"
+                        # Voer de INSERT uit (met device_id=1)
+                        sql = "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status) VALUES (1, %s, %s, %s)"
                         cursor.execute(sql, (moisture, float_val, pump))
                         conn.commit()
                         print("Data succesvol opgeslagen in DB")

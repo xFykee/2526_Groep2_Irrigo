@@ -1,6 +1,12 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "Irrigo/lib/mysql-connector-j-9.5.0.jar"
-    ]
+        "Irrigo/lib/**/*.jar",
+        "Irrigo/src/main/resources/lib/**/*.jar",
+        "Irrigo/lib/javafx.properties"
+    
+        
+    ],
+    "workbench.editor.defaultBinaryEditor": "",
+    "java.debug.settings.onBuildFailureProceed": true
 }
