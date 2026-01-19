@@ -8,7 +8,7 @@ public class DB {
     private static final int PORT = 3306;
     private static final String DATABASE = "irrigo_2526";
     private static final String USER = "root";
-    private static final String PASSWORD = "admin";  // Pas aan naar jouw wachtwoord
+    private static final String PASSWORD = "R22t44t66t88";  // Pas aan naar jouw wachtwoord
 
     private static final String BASE_URL = String.format(
         "jdbc:mysql://%s:%d/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC",
