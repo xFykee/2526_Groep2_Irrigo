@@ -1,6 +1,7 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "Irrigo/lib/mysql-connector-j-9.5.0.jar"
+        "Irrigo/lib/mysql-connector-j-9.5.0.jar",
+        "c:\\Users\\rekan\\Downloads\\jSerialComm-2.11.4.jar"
     ]
 }
