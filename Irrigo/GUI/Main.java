@@ -182,5 +182,9 @@ public class MicrobitMonitor {
         }
     }
 }
-
+public static void insertMeting(int vochtigheid, int waterniveau, int pompStatus) {
+    // Gebruik je database connectie (irrigo_2526)
+    String query = "INSERT INTO metingen (vochtigheid, waterniveau, pomp_status) VALUES (?, ?, ?)";
+    // ... voer de PreparedStatement uit ...
+}
 /* vochtigheid, pomp aan/uit, flow switch */
