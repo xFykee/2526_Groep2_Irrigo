@@ -162,6 +162,32 @@ public class DB {
                                      "VALUES (1, 'Micro:bit Tuin', 'Achtertuin', 'DEFAULT_API_KEY_123', 30.0)";
                 stmt.executeUpdate(insertDevice);
                 System.out.println("✓ Standaard device aangemaakt");
+                
+                // Voeg mock data voor metingen toe
+                insertMockMetingen(conn);
+                System.out.println("✓ Mock metingen data toegevoegd");
+            }
+        }
+    }
+    
+    private static void insertMockMetingen(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            // Voeg enkele mock metingen toe voor de GUI view
+            String[] mockMetingen = {
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 45, 80, false, 22.5)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 38, 75, true, 23.1)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 52, 90, false, 21.8)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 29, 60, true, 24.2)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 67, 95, false, 20.9)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 41, 85, true, 22.7)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 55, 88, false, 23.5)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 33, 70, true, 21.3)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 48, 82, false, 22.0)",
+                "INSERT INTO metingen (device_id, vochtigheid, waterniveau, pomp_status, temperature) VALUES (1, 61, 92, true, 24.8)"
+            };
+            
+            for (String insert : mockMetingen) {
+                stmt.executeUpdate(insert);
             }
         }
     }
