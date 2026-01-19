@@ -4,7 +4,7 @@ header('Access-Control-Allow-Origin: *'); // Zorgt dat je website de data mag op
 
 $host = "localhost";
 $user = "root";
-$pass = "";
+$pass = "admin";
 $db   = "irrigo_db";
 
 $conn = new mysqli($host, $user, $pass, $db);
