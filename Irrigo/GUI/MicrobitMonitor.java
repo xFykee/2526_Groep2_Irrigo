@@ -5,7 +5,7 @@ public class MicrobitMonitor {
 
     public static void main(String[] args) {
         // 1. Selecteer de juiste poort (COM3 op basis van jouw Arduino IDE)
-        SerialPort comPort = SerialPort.getCommPort("COM3");
+        SerialPort comPort = SerialPort.getCommPort("COM5");
         
         // 2. Stel de snelheid in (moet 9600 zijn zoals in je Arduino code)
         comPort.setBaudRate(9600);
