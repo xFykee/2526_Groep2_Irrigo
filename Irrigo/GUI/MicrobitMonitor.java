@@ -12,7 +12,7 @@ public class MicrobitMonitor {
 
         // 3. Probeer de poort te openen
         if (comPort.openPort()) {
-            System.out.println("Succes! Verbonden met Micro:bit op COM3.");
+            System.out.println("Succes! Verbonden met Micro:bit op COM5.");
             System.out.println("Luisteren naar data...");
         } else {
             System.err.println("Fout: Kon COM3 niet openen. Sluit de Serial Monitor in Arduino IDE!");
